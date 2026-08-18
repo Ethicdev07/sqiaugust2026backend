@@ -1,24 +1,11 @@
-const http = require('http');
+require('dotenv').config();
 
-// console.log(http);
+const app = require('./app');
 
-const server = http.createServer((request, response)=>{
-    response.writeHead(200, {
-       "Content-Type": "text/plain",
-    });
+const port = process.env.PORT || 5000;
 
-    response.end('welcome to sqi ecommerce nodejs server')
-
-   
+app.listen(port, ()=>{
+    console.log(`Server is runing on port ${port}`);
     
 })
 
-
-
-
-const Port = process.env.PORT || 8080;
-
-server.listen(Port, ()=>{
-    console.log(`Server is runing on port ${Port}`);
-    
-})
