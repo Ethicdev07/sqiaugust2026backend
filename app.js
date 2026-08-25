@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
+const authRoute = require("./src/routes/authRoutes");
 
 
 const app = express();
@@ -25,7 +26,9 @@ app.get("/api/v1", (req, res)=>{
         staus: "successful",
         message: 'Welcome to Ecommerce owned by August cohort'
     })
-})
+});
+
+app.use("/api/v1", authRoute)
 
 
 module.exports = app;
