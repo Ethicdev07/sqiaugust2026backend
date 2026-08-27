@@ -1,42 +1,46 @@
 const users = require("../models/User");
 
-const register = (req, res)=>{
-    const {name, email, password} = req.body;
+const register = (req, res) => {
+  const { name, email, password } = req.body;
 
-    if(!name || !email || !password){
-        return res.status(400).json({
-            status: "Bad request",
-            message: "Please provide name, email and password"
-        })
-    };
+  if (!name || !email || !password) {
+    return res.status(400).json({
+      status: "Bad request",
+      message: "Please provide name, email and password",
+    });
+  }
 
-    const existingUser = users.find(user => user.email === email);
+  const existingUser = users.find((user) => user.email === email);
 
-   
-    
+  if (existingUser) {
+    return res.status(400).json({
+      message: "Email already exist, use a different email.",
+    });
+  }
 
-    if(existingUser){
-        return res.status(400).json({
-            message: "Email already exist, use a different email."
-        })
-    }
+  const newUser = {
+    id: users.length + 1,
+    name,
+    email,
+    password,
+  };
 
-    const newUser = {
-        id: users.length + 1,
-        name,
-        email,
-        password
-    };
+  users.push(newUser);
 
-    users.push(newUser);
-
-    res.status(201).json({
-        status: "Successful",
-        message: "Account created successfully",
-        user: newUser
-    })
+  res.status(201).json({
+    status: "Successful",
+    message: "Account created successfully",
+    user: newUser,
+  });
 };
 
 //write the function to getAllUsers
 
-module.exports =  register
+const getAllUsers = (req, res)=>{
+    res.status(200).json({
+        message: 'all users fetched succesfully',
+        allUser: users
+    })
+}
+
+module.exports = {register, getAllUsers};
