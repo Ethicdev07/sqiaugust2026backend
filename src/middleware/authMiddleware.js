@@ -5,7 +5,6 @@ const AppError = require("../utils/AppError.js");
 const protectRoute = async (req, res, next) => {
   try {
     let token;
-    
 
     if (
       req.headers.authorization &&
@@ -28,8 +27,7 @@ const protectRoute = async (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
-    next(error)
-    
+    next(error);
   }
 };
 

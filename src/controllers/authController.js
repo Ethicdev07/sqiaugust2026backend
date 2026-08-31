@@ -1,46 +1,52 @@
-const users = require("../models/User");
+const Users = require("../models/User");
+const {validationUserSignup, validationUserLogin} = require("../validation/usersValidation");
+const signJwt = require("../utils/signJWT");
+const bcrypt = require("bcryptjs");
+const AppError = require("../utils/AppError");
 
-const register = (req, res) => {
-  const { name, email, password } = req.body;
+const signUp = async(req, res, next)=>{
+  try {
 
-  if (!name || !email || !password) {
-    return res.status(400).json({
-      status: "Bad request",
-      message: "Please provide name, email and password",
-    });
-  }
+    const validation = validationUserSignup(req.body);
 
-  const existingUser = users.find((user) => user.email === email);
+    if(validation.error){
+      throw new AppError(validation?.error.message, 400);
+    }
 
-  if (existingUser) {
-    return res.status(400).json({
-      message: "Email already exist, use a different email.",
-    });
-  }
+    const {firstname, lastname, email, password} = req.body;
 
-  const newUser = {
-    id: users.length + 1,
-    name,
-    email,
-    password,
-  };
+    //check if user already exist
 
-  users.push(newUser);
+    const existingUser = await Users.findOne({email})
 
-  res.status(201).json({
-    status: "Successful",
-    message: "Account created successfully",
-    user: newUser,
-  });
-};
+    if(existingUser){
+      throw new AppError("User with email already exist")
+    }
 
-//write the function to getAllUsers
+    //Hashing of password
 
-const getAllUsers = (req, res)=>{
-    res.status(200).json({
-        message: 'all users fetched succesfully',
-        allUser: users
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+
+    //create user
+
+    const user = await Users.create({
+      firstname,
+      lastname,
+      email,
+      password: hashedPassword,
     })
+
+    if(!user){
+      throw new AppError("Failed to create user")
+    };
+
+    await user.save()
+    
+  } catch (error) {
+    next(error)
+  }
 }
 
-module.exports = {register, getAllUsers};
+ 
