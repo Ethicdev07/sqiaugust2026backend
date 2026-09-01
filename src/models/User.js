@@ -24,14 +24,14 @@ const userSchema = new mongoose.Schema({
         trim: true,
         select: false
     },
-    role: {
-        type: String,
-        enum: ["user", "admin"],
-        default: false
-    },
-    verification_token: {
-        type: String
-    }
+    // role: {
+    //     type: String,
+    //     enum: ["user", "admin"],
+    //     default: false
+    // },
+    // verification_token: {
+    //     type: String
+    // }
 });
 
 const Users = mongoose.model("Users", userSchema);

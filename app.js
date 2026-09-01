@@ -29,6 +29,11 @@ app.get("/api/v1", (req, res)=>{
     })
 });
 
+//endpoint
+
+app.use("/api/v1/auth", authRoute)
+
+
 
 
 app.use(errorHandler)
