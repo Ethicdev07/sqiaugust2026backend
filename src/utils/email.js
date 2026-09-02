@@ -5,7 +5,6 @@ const sendEmail = async(options)=>{
     const password = process.env.EMAIL_PASSWORD;
 
 
-
     //creating email transporter
 
     const transporter = nodemailer.createTransport({
@@ -18,7 +17,6 @@ const sendEmail = async(options)=>{
 
 
     //configure options
-
 
     const mailOptions = {
         from: "Shopsy <officialrentdirect@gmail.com>",
