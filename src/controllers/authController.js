@@ -103,13 +103,11 @@ const signUp = async (req, res, next) => {
   }
 };
 
-
-const verifyEmailAddress = async (req, res, next)=>{
+const verifyEmailAddress = async (req, res, next) => {
   try {
+    const { email, verificationToken } = req.params;
 
-    const {email, verificationToken} = req.params;
-
-    if(!email || !verificationToken){
+    if (!email || !verificationToken) {
       throw new AppError("Please provide email and token");
     }
 
@@ -117,16 +115,18 @@ const verifyEmailAddress = async (req, res, next)=>{
 
     const user = await Users.findOne({ email });
 
-    if(!user){
-      throw new AppError("User Not Found!")
-    };
-
-    const tokenValid = await bcrypt.compare(verificationToken, user.verification_token);
-
-    if(!tokenValid){
-      throw new AppError("Failed to verify user - Invalid token")
+    if (!user) {
+      throw new AppError("User Not Found!");
     }
 
+    const tokenValid = await bcrypt.compare(
+      verificationToken,
+      user.verification_token,
+    );
+
+    if (!tokenValid) {
+      throw new AppError("Failed to verify user - Invalid token");
+    }
 
     user.email_verified = true;
 
@@ -134,18 +134,97 @@ const verifyEmailAddress = async (req, res, next)=>{
 
     res.status(201).json({
       status: "successful",
-      message: 'User verified succesfully',
+      message: "User verified succesfully",
       data: {
         user,
-      }
-    })
-    
-    
+      },
+    });
   } catch (error) {
-    next(error)
+    next(error);
   }
+};
+
+const forgetPassword = async(req, res, next) => {
+  try {
+  const { email } = req.body;
+
+  if (!email) {
+    throw new AppError("Please provide your email", 403);
+  }
+
+  const existingUser = await Users.findOne({ email });
+  if (!existingUser) {
+    throw new AppError("User with email does not exsit", 400);
+  }
+
+  const resetToken = crypto.randomBytes(32).toString("hex");
+  const resetTokenExpiry = Date.now() + 10 * 60 * 1000;
+
+  const salt = await bcrypt.genSalt(10);
+  const hashedResetToken = await bcrypt.hash(resetToken, salt);
+
+  existingUser.reset_password_token = hashedResetToken;
+  existingUser.reset_password_expires = resetTokenExpiry;
+
+  await existingUser.save();
+
+  // const resetUrl = `https://localhost:8000/api/v1/auth/resetpassword/${existingUser.email}/${resetToken}`;
+  const resetUrl = `${req.protocol}://${req.get("host",)}/api/v1/auth/forgotpassword/${resetToken}`;
+  const resetMessage = `Please click on this link to reset password. \n ${resetUrl}`;
+
+  const resetMailOptions = {
+    email: email,
+    subject: "Please reset your password",
+    message: resetMessage,
+  };
+
+  await sendEmail(resetMailOptions);
+
+  res.status(200).json({
+    status: "success",
+    message: "Reset password link has been sent to your email",
+  });
+} catch (error) {
+  next(error);
 }
+};
+
+const verifyResetToken = async (req, res, next) => {
+  try {
+    const { email, resetToken } = req.params;
+
+    console.log(resetToken)
+
+    if (!email || !resetToken) {
+      throw new AppError("Please provide email and token", 400);
+    }
+
+    const user = await Users.findOne({ email }).select("+reset_password_token");
+
+    if (!user) {
+      throw new AppError("User not found", 404);
+    }
+
+    const tokenValid = await bcrypt.compare(resetToken, user.reset_password_token);
+
+    if (!tokenValid) {
+      throw new AppError("Failed to verify user - Invalid token", 401);
+    }
+
+    res.status(201).json({
+      status: "Successful",
+      message: "Token verified successfully",
+      data: {
+        user,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 
-//Write login controller function, users must have been verified before they can login
-module.exports = { signUp, verifyEmailAddress };
+
+
+
+module.exports = { signUp, forgetPassword, verifyEmailAddress, verifyResetToken };
