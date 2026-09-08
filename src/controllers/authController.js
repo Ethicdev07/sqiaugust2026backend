@@ -161,7 +161,7 @@ const login = async (req, res, next) => {
     }
     
     if(!user.email_verified){
-      throw new AppError("kindly verify email", 404);
+      throw new AppError("kindly verify email", 401);
       
     }
 
