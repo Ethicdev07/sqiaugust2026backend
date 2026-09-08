@@ -144,6 +144,49 @@ const verifyEmailAddress = async (req, res, next) => {
   }
 };
 
+const login = async (req, res, next) => {
+  try {
+    const validation = validationUserLogin(req.body);
+
+    if (validation.error) {
+      throw new AppError(validation.error.message, 400);
+    }
+
+    const { email, password } = req.body;
+
+    const user = await Users.findOne({ email }).select("+password");
+
+    if (!user) {
+      throw new AppError("Incorrect email or password", 401);
+    }
+    
+    if(!user.email_verified){
+      throw new AppError("kindly verify email", 404);
+      
+    }
+
+    const passwordIsValid = await bcrypt.compare(password, user.password);
+
+    if (!passwordIsValid) {
+      throw new AppError("Incorrect email or password", 401);
+    }
+
+    const token = signJwt(user._id);
+    user.password = undefined;
+
+    res.status(200).json({
+      status: "successful",
+      message: "Login successful",
+      data: {
+        user,
+        token,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const forgetPassword = async(req, res, next) => {
   try {
   const { email } = req.body;
@@ -168,8 +211,8 @@ const forgetPassword = async(req, res, next) => {
 
   await existingUser.save();
 
-  // const resetUrl = `https://localhost:8000/api/v1/auth/resetpassword/${existingUser.email}/${resetToken}`;
-  const resetUrl = `${req.protocol}://${req.get("host",)}/api/v1/auth/forgotpassword/${resetToken}`;
+  // Build a URL that matches the verify route signature.
+  const resetUrl = `${req.protocol}://${req.get("host")}/api/v1/auth/forgetpassword/${existingUser.email}/${resetToken}`;
   const resetMessage = `Please click on this link to reset password. \n ${resetUrl}`;
 
   const resetMailOptions = {
@@ -223,8 +266,76 @@ const verifyResetToken = async (req, res, next) => {
   }
 };
 
+const resetPassword = async (req, res, next) => {
+  try {
+    const { email, resetToken } = req.params;
+    const { password } = req.body;
+
+    if (!email || !resetToken || !password) {
+      throw new AppError("Please provide email, token and new password", 400);
+    }
+
+    if (password.length < 8) {
+      throw new AppError("Password must be at least 8 characters", 400);
+    }
+
+    const user = await Users.findOne({ email }).select("+reset_password_token");
+
+    if (!user) {
+      throw new AppError("User not found", 404);
+    }
+
+    if (!user.reset_password_token) {
+      throw new AppError("Reset token is invalid", 400);
+    }
+
+    if (
+      !user.reset_password_expires ||
+      new Date(user.reset_password_expires).getTime() < Date.now()
+    ) {
+      throw new AppError("Reset token has expired. Request another one", 400);
+    }
+
+    const tokenValid = await bcrypt.compare(resetToken, user.reset_password_token);
+
+    if (!tokenValid) {
+      throw new AppError("Failed to reset password - Invalid token", 401);
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    user.password = hashedPassword;
+    user.reset_password_token = undefined;
+    user.reset_password_expires = undefined;
+
+    await user.save();
+
+    const token = signJwt(user._id);
+    user.password = undefined;
+
+    res.status(200).json({
+      status: "successful",
+      message: "Password reset successful",
+      data: {
+        user,
+        token,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 
 
 
-module.exports = { signUp, forgetPassword, verifyEmailAddress, verifyResetToken };
+
+module.exports = {
+  signUp,
+  login,
+  forgetPassword,
+  verifyEmailAddress,
+  verifyResetToken,
+  resetPassword,
+};
