@@ -2,7 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const authRoute = require("./src/routes/authRoutes");
-const errorHandler = require("./src/middleware/error")
+const errorHandler = require("./src/middleware/error");
+const userRoute = require('./src/routes/userRoutes')
 
 
 const app = express();
@@ -31,7 +32,8 @@ app.get("/api/v1", (req, res)=>{
 
 //endpoint
 
-app.use("/api/v1/auth", authRoute)
+app.use("/api/v1/auth", authRoute);
+app.use("/api/v1/users", userRoute)
 
 
 
