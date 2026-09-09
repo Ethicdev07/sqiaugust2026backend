@@ -8,7 +8,9 @@ const router = express.Router();
 
 router.route("/getallusers").get(userController.getAllUsers);
 
-router.route("/profile").get(authMiddleware.protectRoute, userController.getUserProfile)
+router.route("/profile").get(authMiddleware.protectRoute, userController.getUserProfile);
+
+router.route("/updatepassword").patch(authMiddleware.protectRoute, userController.updatePassword)
 
 
 

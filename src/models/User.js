@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs")
 
 const userSchema = new mongoose.Schema({
   firstname: {
@@ -47,6 +48,10 @@ const userSchema = new mongoose.Schema({
 
 userSchema.methods.getFullName = function(){
   return `${this.firstname} ${this.lastname}`
+}
+
+userSchema.methods.comparePassword = async function(password, hashedPassword){
+  return await bcrypt.compare(password, hashedPassword)
 }
 
 
