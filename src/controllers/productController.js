@@ -39,7 +39,7 @@ const createNewProduct = async (req, res, next) =>{
         });
 
         if(!newProduct){
-            throw new AppError("An error occured while creating product", 400)
+            throw new AppError("An error occured while creating product", 404)
         };
 
         res.status(201).json({
