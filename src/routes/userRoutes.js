@@ -10,10 +10,9 @@ const router = express.Router();
 
 router.route("/getallusers").get(userController.getAllUsers);
 
-router.route("/profile").get(authMiddleware.protectRoute, userController.getUserProfile);
-
-
-
+router.route("/profile")
+.get(authMiddleware.protectRoute, userController.getUserProfile)
+.patch(authMiddleware.protectRoute, userController.updateProfile);
 
 router.route("/update-profile-picture").patch(authMiddleware.protectRoute, imageUploads, userController.updateProfilePicture)
 

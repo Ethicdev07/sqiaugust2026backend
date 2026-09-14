@@ -95,6 +95,44 @@ const updateProfilePicture = async (req, res, next) => {
 
 
 //updateProfile(firstname, lastname, bio)
+const updateProfile = async (req, res, next)=>{
+  try {
+    const userId = req.user._id;
+    const user =await Users.findById(userId);
+
+    if(!user){
+      throw new AppError("User not found", 404)
+    };
+
+    const allowedFields = ["firstname", "lastname", "bio"];
+
+    const fieldsToUpdate = Object.keys(req.body);
+
+    fieldsToUpdate.forEach((field)=>{
+      if(allowedFields.includes(field)){
+        user[field] = req.body[field]
+      }
+      else{
+        throw new AppError(`Field ${field} is not allowed to be updated`, 400)
+      }
+    });
+
+    await user.save();
+
+    res.status(200).json({
+      status: "succesful",
+      message: "profile updated successfully",
+      data: {
+        user
+      }
+    })
+
+
+    
+  } catch (error) {
+    next(error)
+  }
+}
 
 //update userpassword
 
@@ -158,5 +196,6 @@ module.exports = {
   getAllUsers,
   getUserProfile,
   updateProfilePicture,
+  updateProfile,
   updatePassword,
 };

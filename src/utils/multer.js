@@ -32,7 +32,7 @@ const upload = multer({
   },
 }).fields([
   { name: "profile_image", maxCount: 1 },
-  { name: "image", maxCount: 1 },
+  { name: "product_image", maxCount: 3 },
 ]);
 
 const imageUploads = (req, res, next) => {
@@ -40,8 +40,8 @@ const imageUploads = (req, res, next) => {
     if (err) return next(err);
 
     const profileImage = req.files?.profile_image?.[0];
-    const image = req.files?.image?.[0];
-    req.file = profileImage || image;
+    const productImage = req.files?.product_image?.[0];
+    req.file = profileImage || productImage;
 
     next();
   });
