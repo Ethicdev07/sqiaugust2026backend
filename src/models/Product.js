@@ -1,6 +1,10 @@
 const mongoose = require("mongoose");
 
 const productSchema = new mongoose.Schema({
+    // id: {
+    //     type: String,
+    //     unique: [true, "Product id must be unique"]
+    // },
     title: {
         type: String,
         required: [true, "Please provide product title"],
