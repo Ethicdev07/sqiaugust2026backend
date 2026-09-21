@@ -65,9 +65,7 @@ const signUp = async (req, res, next) => {
 
     //create verificationUrl
 
-    const verificationUrl = `${req.protocol}://${req.get(
-      "host",
-    )}/api/v1/auth/verify/${user.email}/${verificationToken}`;
+    const verificationUrl = `${process.env.FRONTEND_URL}/verify/${user.email}/${verificationToken}`;
 
     //create verification message
 
@@ -212,7 +210,7 @@ const forgetPassword = async(req, res, next) => {
   await existingUser.save();
 
   // Build a URL that matches the verify route signature.
-  const resetUrl = `${req.protocol}://${req.get("host")}/api/v1/auth/forgetpassword/${existingUser.email}/${resetToken}`;
+  const resetUrl = `${process.env.FRONTEND_URL}/forgetpassword/${existingUser.email}/${resetToken}`;
   const resetMessage = `Please click on this link to reset password. \n ${resetUrl}`;
 
   const resetMailOptions = {

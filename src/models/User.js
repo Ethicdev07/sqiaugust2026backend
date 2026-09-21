@@ -53,8 +53,8 @@ const userSchema = new mongoose.Schema({
 });
 
 
-userSchema.methods.getFullName = function(){
-  return `${this.firstname} ${this.lastname}`
+userSchema.methods.getFirstName = function(){
+  return `${this.firstname}`
 }
 
 userSchema.methods.comparePassword = async function(password, hashedPassword){

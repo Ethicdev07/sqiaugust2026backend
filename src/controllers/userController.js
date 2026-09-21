@@ -35,7 +35,7 @@ const getUserProfile = async (req, res, next) => {
       throw new AppError(`Users with ${id} not found`, 404);
     }
 
-    const fullname = user.getFullName();
+    const fullname = user.getFirstName();
 
     res.status(200).json({
       status: "success",
