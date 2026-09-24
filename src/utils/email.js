@@ -12,7 +12,10 @@ const sendEmail = async(options)=>{
         auth: {
             user: email,
             pass: password
-        }
+        },
+        connectionTimeout: 10000,
+        greetingTimeout: 10000,
+        socketTimeout: 10000
     });
 
 

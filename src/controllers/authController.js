@@ -43,18 +43,6 @@ const signUp = async (req, res, next) => {
       throw new AppError("Failed to create user");
     }
 
-    //Send mail verification
-
-    const options = {
-      email: email,
-      subject:
-        "Welcome to SQI AUGUST Ecommerce platform, where product price get better",
-      message:
-        "Welcome onboard. We are pleased to have you. Shop Now, get better price.",
-    };
-
-    await sendEmail(options);
-
     //Create verification token
 
     const verificationToken = crypto.randomBytes(32).toString("hex");
@@ -71,17 +59,32 @@ const signUp = async (req, res, next) => {
 
     const verificationMessage = `Please click on the verification link to verify your email. \n ${verificationUrl}`;
 
+    user.verification_token = hashedVerficationToken;
+
+    await user.save();
+
+    //Send welcome + verification mail without blocking the signup response
+
+    const options = {
+      email: email,
+      subject:
+        "Welcome to SQI AUGUST Ecommerce platform, where product price get better",
+      message:
+        "Welcome onboard. We are pleased to have you. Shop Now, get better price.",
+    };
+
     const verificationMailOptions = {
       email: email,
       subject: "Verify your email address",
       message: verificationMessage,
     };
 
-    await sendEmail(verificationMailOptions);
-
-    user.verification_token = hashedVerficationToken;
-
-    await user.save();
+    sendEmail(options).catch((err) =>
+      console.error("Failed to send welcome email:", err.message),
+    );
+    sendEmail(verificationMailOptions).catch((err) =>
+      console.error("Failed to send verification email:", err.message),
+    );
 
     const token = signJwt(user._id);
 
