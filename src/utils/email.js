@@ -1,35 +1,19 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require("resend");
 
-const sendEmail = async(options)=>{
-    const email = process.env.EMAIL;
-    const password = process.env.EMAIL_PASSWORD;
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-
-    //creating email transporter
-
-    const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-            user: email,
-            pass: password
-        },
-        connectionTimeout: 10000,
-        greetingTimeout: 10000,
-        socketTimeout: 10000
-    });
-
-
-    //configure options
-
-    const mailOptions = {
-        from: "Shopsy <officialrentdirect@gmail.com>",
+const sendEmail = async (options) => {
+    const { error } = await resend.emails.send({
+        from: process.env.EMAIL_FROM || process.env.EMAIL || "Shopsy <onboarding@resend.dev>",
         to: options.email,
         subject: options.subject,
-        text: options.message
-    };
+        text: options.message,
+        html: options.html,
+    });
 
-
-    await transporter.sendMail(mailOptions)
+    if (error) {
+        throw new Error(error.message || "Failed to send email");
+    }
 };
 
 module.exports = sendEmail;

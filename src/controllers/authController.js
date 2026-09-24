@@ -58,6 +58,7 @@ const signUp = async (req, res, next) => {
     //create verification message
 
     const verificationMessage = `Please click on the verification link to verify your email. \n ${verificationUrl}`;
+    const verificationHtml = `<p>Please click the link below to verify your email.</p><p><a href="${verificationUrl}">Verify your email</a></p><p>Or paste this URL into your browser: ${verificationUrl}</p>`;
 
     user.verification_token = hashedVerficationToken;
 
@@ -77,6 +78,7 @@ const signUp = async (req, res, next) => {
       email: email,
       subject: "Verify your email address",
       message: verificationMessage,
+      html: verificationHtml,
     };
 
     sendEmail(options).catch((err) =>
@@ -215,11 +217,13 @@ const forgetPassword = async(req, res, next) => {
   // Build a URL that matches the verify route signature.
   const resetUrl = `${process.env.FRONTEND_URL}/forgetpassword/${existingUser.email}/${resetToken}`;
   const resetMessage = `Please click on this link to reset password. \n ${resetUrl}`;
+  const resetHtml = `<p>Please click the link below to reset your password.</p><p><a href="${resetUrl}">Reset your password</a></p><p>Or paste this URL into your browser: ${resetUrl}</p><p>This link expires in 10 minutes.</p>`;
 
   const resetMailOptions = {
     email: email,
     subject: "Please reset your password",
     message: resetMessage,
+    html: resetHtml,
   };
 
   await sendEmail(resetMailOptions);
