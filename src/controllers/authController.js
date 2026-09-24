@@ -163,10 +163,10 @@ const login = async (req, res, next) => {
       throw new AppError("Incorrect email or password", 401);
     }
     
-    if(!user.email_verified){
-      throw new AppError("kindly verify email", 401);
+    // if(!user.email_verified){
+    //   throw new AppError("kindly verify email", 401);
       
-    }
+    // }
 
     const passwordIsValid = await bcrypt.compare(password, user.password);
 
