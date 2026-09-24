@@ -28,13 +28,6 @@ app.use(cors({
 app.use(morgan("dev"))
 
 
-app.get('/', (req, res)=>{
-    res.status(200).json({
-        staus: 'succesful',
-        message: "Welcome to August backend class"
-
-    })
-});
 
 app.get("/api/v1", (req, res)=>{
     res.status(200).json({
